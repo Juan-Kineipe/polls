@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { randomUUID } from "crypto";
 import { prisma } from "../../lib/prisma";
 import z from "zod";
+import { redis } from "../../lib/redis";
 
 export async function voteOnPoll(app: FastifyInstance) {
 	app.post("/polls/:pollId/votes", async (request, reply) => {
@@ -31,12 +32,14 @@ export async function voteOnPoll(app: FastifyInstance) {
 				userPreviousVoteOnPoll &&
 				userPreviousVoteOnPoll.pollOptionId !== pollOptionId
 			) {
-				// User voted in another option, remove old vote
+				// User voted in another option
 				await prisma.vote.delete({
 					where: {
 						id: userPreviousVoteOnPoll.id,
 					},
 				});
+
+				await redis.zincrby(pollId, -1, userPreviousVoteOnPoll.pollOptionId);
 			} else if (userPreviousVoteOnPoll) {
 				// User voted in the same option
 				return reply
@@ -62,6 +65,8 @@ export async function voteOnPoll(app: FastifyInstance) {
 				pollOptionId,
 			},
 		});
+
+		await redis.zincrby(pollId, 1, pollOptionId);
 
 		return reply.status(201).send();
 	});

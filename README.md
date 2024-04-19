@@ -15,7 +15,7 @@ A real-time polling system where users can create polls which other users can vo
 - Setup Docker to use PostgreSQL and Redis (`docker compose up -d`);
 - Create a file named `.env` at the root of the project with the following content: (`DATABASE_URL="postgresql://docker:docker@localhost:5432/polls?schema=public"`);
 - Run application (`npm run dev`);
-- Test it using [Postman](https://www.postman.com) or any other API platform.
+- Test it using any API platform (e.g. [Postman](https://www.postman.com)).
 
 ## HTTP
 
